@@ -1,0 +1,366 @@
+﻿@model ProductionPlanningDashboard.Models.ViewModels.DataEntryViewModel
+@{
+    ViewData["Title"] = "Bottom Department Entry";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="mb-1">
+                    <i class="bi bi-circle text-warning me-2"></i>Bottom Department Entry
+                </h2>
+                <p class="text-muted">Enter production data for bottom manufacturing processes</p>
+            </div>
+            <div class="btn-group">
+                <a href="/Dashboard" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Date Selection Card -->
+<div class="card entry-card mb-4">
+    <div class="card-header bg-warning text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-calendar me-2"></i>Production Date
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <label class="form-label">Select Date</label>
+                <div class="input-group">
+                    <input type="date" id="productionDate" class="form-control"
+                           value="@Model.SelectedDate.ToString("yyyy-MM-dd")" onchange="updateDateInfo()">
+                    <button class="btn btn-outline-secondary" onclick="setToday()">Today</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Week Number</label>
+                <input type="number" id="weekNumber" class="form-control" readonly
+                       value="@Model.WeekNumber" min="1" max="53">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Month</label>
+                <input type="number" id="monthNumber" class="form-control" readonly
+                       value="@Model.MonthNumber" min="1" max="12">
+            </div>
+        </div>
+
+        <div class="date-info mt-3">
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <strong>Selected Date:</strong><br>
+                    <span id="displayDate">@Model.SelectedDate.ToString("dddd, MMMM dd, yyyy")</span>
+                </div>
+                <div class="col-md-4">
+                    <strong>Week:</strong><br>
+                    <span id="displayWeek">Week @Model.WeekNumber of @Model.Year</span>
+                </div>
+                <div class="col-md-4">
+                    <strong>Period:</strong><br>
+                    <select id="periodType" class="form-select d-inline-block w-auto">
+                        <option value="Weekly">Weekly</option>
+                        <option value="Monthly">Monthly</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Production Entry Card -->
+<div class="card entry-card">
+    <div class="card-header bg-warning text-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-list-task me-2"></i>Bottom Production Lines Entry
+            </h5>
+            <button class="btn btn-light btn-sm" onclick="showAddLineModal()">
+                <i class="bi bi-plus-circle me-1"></i>Add Production Line
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Bottom Department:</strong> Enter production data for sole making, heel attachment, and bottom finishing processes.
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped entry-table" id="bottomTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Company</th>
+                        <th>Production Line</th>
+                        <th>Planned Quantity</th>
+                        <th>Actual Quantity</th>
+                        <th>Difference</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="bottomTableBody">
+                    <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4 text-center">
+            <button class="btn btn-save btn-lg me-3" onclick="saveBottomData()">
+                <i class="bi bi-floppy me-2"></i>Save Production Data
+            </button>
+            <button class="btn btn-outline-secondary btn-lg" onclick="clearAllData()">
+                <i class="bi bi-trash me-2"></i>Clear All
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Line Modal (Same structure as FullShoe) -->
+<div class="modal fade" id="addLineModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Bottom Production Line</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Select Company</label>
+                    <select id="modalCompanySelect" class="form-select" onchange="loadCompanyLines()">
+                        <option value="">Choose Company...</option>
+                        @foreach (var company in Model.Companies)
+                        {
+                            <option value="@company.Id">@company.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Select Production Line</label>
+                    <select id="modalLineSelect" class="form-select">
+                        <option value="">Choose Line...</option>
+                    </select>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">Planned Quantity</label>
+                        <input type="number" id="modalPlannedQty" class="form-control" min="0" step="0.01" placeholder="0">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Actual Quantity</label>
+                        <input type="number" id="modalActualQty" class="form-control" min="0" step="0.01" placeholder="0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addLineEntry()">Add Entry</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Same JavaScript as FullShoe but for Bottom department (departmentId = 3)
+        let lineEntries = [];
+        let companies = @Html.Raw(Json.Serialize(Model.Companies));
+
+        // Initialize page
+        $(document).ready(function() {
+            updateDateInfo();
+            loadExistingData();
+        });
+
+        // Date functions
+        function updateDateInfo() {
+            const date = new Date(document.getElementById('productionDate').value);
+            document.getElementById('weekNumber').value = getWeekNumber(date);
+            document.getElementById('monthNumber').value = date.getMonth() + 1;
+            document.getElementById('displayDate').textContent = formatDate(date);
+            document.getElementById('displayWeek').textContent = `Week ${getWeekNumber(date)} of ${date.getFullYear()}`;
+        }
+
+        function setToday() {
+            document.getElementById('productionDate').value = new Date().toISOString().split('T')[0];
+            updateDateInfo();
+        }
+
+        // Modal functions
+        function showAddLineModal() {
+            document.getElementById('modalCompanySelect').value = '';
+            document.getElementById('modalLineSelect').innerHTML = '<option value="">Choose Line...</option>';
+            document.getElementById('modalPlannedQty').value = '';
+            document.getElementById('modalActualQty').value = '';
+            new bootstrap.Modal(document.getElementById('addLineModal')).show();
+        }
+
+        function loadCompanyLines() {
+            const companyId = document.getElementById('modalCompanySelect').value;
+            const lineSelect = document.getElementById('modalLineSelect');
+
+            if (!companyId) {
+                lineSelect.innerHTML = '<option value="">Choose Line...</option>';
+                return;
+            }
+
+            lineSelect.innerHTML = '<option value="">Loading...</option>';
+
+            fetch(`/DataEntry/GetLinesByCompany?companyId=${companyId}&departmentId=3`) // Bottom dept = 3
+                .then(response => response.json())
+                .then(lines => {
+                    lineSelect.innerHTML = '<option value="">Choose Line...</option>';
+                    lines.forEach(line => {
+                        lineSelect.innerHTML += `<option value="${line.id}">${line.name}</option>`;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading lines:', error);
+                    lineSelect.innerHTML = '<option value="">Error loading lines</option>';
+                });
+        }
+
+        function addLineEntry() {
+            const companyId = document.getElementById('modalCompanySelect').value;
+            const lineId = document.getElementById('modalLineSelect').value;
+            const plannedQty = parseFloat(document.getElementById('modalPlannedQty').value) || 0;
+            const actualQty = parseFloat(document.getElementById('modalActualQty').value) || 0;
+
+            if (!companyId || !lineId) {
+                alert('Please select both company and line');
+                return;
+            }
+
+            const companyName = companies.find(c => c.id == companyId)?.name || '';
+            const lineName = document.getElementById('modalLineSelect').options[document.getElementById('modalLineSelect').selectedIndex].text;
+
+            const entry = {
+                id: 0,
+                lineId: parseInt(lineId),
+                lineName: lineName,
+                companyName: companyName,
+                plannedQuantity: plannedQty,
+                actualQuantity: actualQty,
+                isNew: true,
+                isDeleted: false
+            };
+
+            lineEntries.push(entry);
+            renderTable();
+            bootstrap.Modal.getInstance(document.getElementById('addLineModal')).hide();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('bottomTableBody');
+            tbody.innerHTML = '';
+
+            lineEntries.forEach((entry, index) => {
+                if (entry.isDeleted) return;
+
+                const difference = entry.actualQuantity - entry.plannedQuantity;
+                const row = `
+                    <tr>
+                        <td>${entry.companyName}</td>
+                        <td>${entry.lineName}</td>
+                        <td>
+                            <input type="number" class="form-control" value="${entry.plannedQuantity}"
+                                   min="0" step="0.01" onchange="updateEntry(${index}, 'plannedQuantity', this.value)">
+                        </td>
+                        <td>
+                            <input type="number" class="form-control" value="${entry.actualQuantity}"
+                                   min="0" step="0.01" onchange="updateEntry(${index}, 'actualQuantity', this.value)">
+                        </td>
+                        <td>
+                            <span class="badge ${difference >= 0 ? 'bg-success' : 'bg-danger'} fs-6">
+                                ${difference.toFixed(2)}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteEntry(${index})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+
+            if (lineEntries.filter(e => !e.isDeleted).length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No entries yet. Click "Add Production Line" to get started.</td></tr>';
+            }
+        }
+
+        function updateEntry(index, field, value) {
+            lineEntries[index][field] = parseFloat(value) || 0;
+            renderTable();
+        }
+
+        function deleteEntry(index) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                lineEntries[index].isDeleted = true;
+                renderTable();
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                lineEntries = [];
+                renderTable();
+            }
+        }
+
+        function saveBottomData() {
+            const validEntries = lineEntries.filter(e => !e.isDeleted);
+
+            if (validEntries.length === 0) {
+                alert('No data to save. Please add some production entries first.');
+                return;
+            }
+
+            const data = {
+                date: document.getElementById('productionDate').value,
+                periodType: document.getElementById('periodType').value,
+                lineEntries: validEntries
+            };
+
+            // Show loading state
+            const saveButton = document.querySelector('button[onclick="saveBottomData()"]');
+            const originalText = saveButton.innerHTML;
+            saveButton.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i>Saving...';
+            saveButton.disabled = true;
+
+            fetch('/DataEntry/SaveBottomEntry', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showToast('Error: ' + result.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error saving data', 'danger');
+            })
+            .finally(() => {
+                saveButton.innerHTML = originalText;
+                saveButton.disabled = false;
+            });
+        }
+
+        function loadExistingData() {
+            // Load existing data for the selected date
+            renderTable();
+        }
+    </script>
+}

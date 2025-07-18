@@ -1,0 +1,449 @@
+﻿<!-- ===== FIXED VIEWS/Dashboard/Analytics.cshtml ===== -->
+@model ProductionPlanningDashboard.Models.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Production Analytics";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="bi bi-graph-up me-2"></i>Production Analytics & Reports
+        </h1>
+        <p class="text-muted">Comprehensive analysis of production performance data</p>
+    </div>
+</div>
+
+<!-- Filters Card (Same as Dashboard) -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-funnel me-2"></i>Report Filters
+        </h5>
+    </div>
+    <div class="card-body">
+        <form id="analyticsFilterForm" asp-action="Analytics" method="get">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="CompanyId" class="form-label">Company</label>
+                    <select asp-for="Filters.CompanyId" class="form-select" id="CompanyId">
+                        <option value="">All Companies</option>
+                        @foreach (var company in Model.Companies)
+                        {
+                            <option value="@company.Id" selected="@(Model.Filters.CompanyId == company.Id)">@company.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="DepartmentId" class="form-label">Department</label>
+                    <select asp-for="Filters.DepartmentId" class="form-select" id="DepartmentId">
+                        <option value="">All Departments</option>
+                        @foreach (var dept in Model.Departments)
+                        {
+                            <option value="@dept.Id" selected="@(Model.Filters.DepartmentId == dept.Id)">@dept.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label for="StartDate" class="form-label">Start Date</label>
+                    <input asp-for="Filters.StartDate" type="date" class="form-control" id="StartDate" />
+                </div>
+
+                <div class="col-md-2">
+                    <label for="EndDate" class="form-label">End Date</label>
+                    <input asp-for="Filters.EndDate" type="date" class="form-control" id="EndDate" />
+                </div>
+
+                <div class="col-md-2">
+                    <label for="PeriodType" class="form-label">Period</label>
+                    <select asp-for="Filters.PeriodType" class="form-select" id="PeriodType">
+                        <option value="Weekly">Weekly</option>
+                        <option value="Monthly">Monthly</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-search me-1"></i>Apply Filters
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="clearAnalyticsFilters()">
+                        <i class="bi bi-x-circle me-1"></i>Clear
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Analytics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col me-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Overall Efficiency</div>
+                        <div class="h4 mb-0 font-weight-bold text-gray-800">
+                            @Model.Stats.PerformancePercentage.ToString("F1")%
+                        </div>
+                        <div class="small text-muted">
+                            @if (Model.Stats.PerformancePercentage >= 100)
+                            {
+                                <span class="text-success">Above Target</span>
+                            }
+                            else if (Model.Stats.PerformancePercentage >= 90)
+                            {
+                                <span class="text-warning">Near Target</span>
+                            }
+                            else
+                            {
+                                <span class="text-danger">Below Target</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-speedometer2 fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col me-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Achievement Gap</div>
+                        <div class="h4 mb-0 font-weight-bold text-gray-800">
+                            @Model.Stats.TotalDifference.ToString("N0")
+                        </div>
+                        <div class="small text-muted">
+                            @(Model.Stats.TotalDifference >= 0 ? "Surplus" : "Shortfall")
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-bar-chart fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col me-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Data Points</div>
+                        <div class="h4 mb-0 font-weight-bold text-gray-800">@Model.Stats.TotalRecords</div>
+                        <div class="small text-muted">Production entries</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-database fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <!-- Performance by Company Chart -->
+    <div class="col-xl-6 col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Performance by Company</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="companyPerformanceChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Trend Chart -->
+    <div class="col-xl-6 col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Monthly Production Trend</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="monthlyTrendChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Department Analysis -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Department Efficiency Analysis</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="departmentChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Data Table -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">Detailed Production Data</h6>
+        <div class="btn-group" role="group">
+            <a href="#" onclick="exportCurrentData()" class="btn btn-sm btn-success">
+                <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+            </a>
+            <button class="btn btn-sm btn-primary" onclick="printReport()">
+                <i class="bi bi-printer me-1"></i>Print Report
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            @Html.Partial("_SummaryTable", Model.SummaryData)
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Store current filter values for API calls
+        const currentFilters = {
+            companyId: '@Model.Filters.CompanyId',
+            departmentId: '@Model.Filters.DepartmentId',
+            startDate: '@Model.Filters.StartDate?.ToString("yyyy-MM-dd")',
+            endDate: '@Model.Filters.EndDate?.ToString("yyyy-MM-dd")',
+            periodType: '@Model.Filters.PeriodType'
+        };
+
+        // Load charts when page loads
+        $(document).ready(function() {
+            loadPerformanceChart();
+            loadTrendChart();
+            loadDepartmentChart();
+        });
+
+        function buildQueryString() {
+            const params = new URLSearchParams();
+
+            if (currentFilters.companyId) params.append('CompanyId', currentFilters.companyId);
+            if (currentFilters.departmentId) params.append('DepartmentId', currentFilters.departmentId);
+            if (currentFilters.startDate) params.append('StartDate', currentFilters.startDate);
+            if (currentFilters.endDate) params.append('EndDate', currentFilters.endDate);
+            if (currentFilters.periodType) params.append('PeriodType', currentFilters.periodType);
+
+            return params.toString();
+        }
+
+        function loadPerformanceChart() {
+            const queryString = buildQueryString();
+            fetch(`/Dashboard/GetChartData?chartType=performance&${queryString}`)
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('companyPerformanceChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.map(d => d.company),
+                            datasets: [{
+                                label: 'Planned',
+                                data: data.map(d => d.planned),
+                                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }, {
+                                label: 'Actual',
+                                data: data.map(d => d.actual),
+                                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Production Performance by Company'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading performance chart:', error);
+                    document.getElementById('companyPerformanceChart').parentElement.innerHTML =
+                        '<div class="text-center text-muted p-4">Error loading chart data</div>';
+                });
+        }
+
+        function loadTrendChart() {
+            const queryString = buildQueryString();
+            fetch(`/Dashboard/GetChartData?chartType=trend&${queryString}`)
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.map(d => d.month),
+                            datasets: [{
+                                label: 'Planned',
+                                data: data.map(d => d.planned),
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                fill: false
+                            }, {
+                                label: 'Actual',
+                                data: data.map(d => d.actual),
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                fill: false
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Monthly Production Trend'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading trend chart:', error);
+                    document.getElementById('monthlyTrendChart').parentElement.innerHTML =
+                        '<div class="text-center text-muted p-4">Error loading chart data</div>';
+                });
+        }
+
+        function loadDepartmentChart() {
+            const queryString = buildQueryString();
+            fetch(`/Dashboard/GetChartData?chartType=department&${queryString}`)
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('departmentChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: data.map(d => d.department),
+                            datasets: [{
+                                data: data.map(d => d.efficiency),
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.8)',
+                                    'rgba(54, 162, 235, 0.8)',
+                                    'rgba(255, 205, 86, 0.8)',
+                                    'rgba(75, 192, 192, 0.8)'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Department Efficiency Comparison'
+                                },
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading department chart:', error);
+                    document.getElementById('departmentChart').parentElement.innerHTML =
+                        '<div class="text-center text-muted p-4">Error loading chart data</div>';
+                });
+        }
+
+        function exportCurrentData() {
+            const queryString = buildQueryString();
+            window.location.href = `/Dashboard/ExportToExcel?${queryString}`;
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function clearAnalyticsFilters() {
+            document.getElementById('CompanyId').value = '';
+            document.getElementById('DepartmentId').value = '';
+            document.getElementById('StartDate').value = '';
+            document.getElementById('EndDate').value = '';
+            document.getElementById('PeriodType').value = 'Weekly';
+
+            // Submit form to refresh with cleared filters
+            document.getElementById('analyticsFilterForm').submit();
+        }
+
+        // Auto-submit filters on change
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterElements = ['CompanyId', 'DepartmentId', 'PeriodType'];
+
+            filterElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', function() {
+                        // Update current filters
+                        if (id === 'CompanyId') currentFilters.companyId = this.value;
+                        if (id === 'DepartmentId') currentFilters.departmentId = this.value;
+                        if (id === 'PeriodType') currentFilters.periodType = this.value;
+
+                        // Reload charts with new filters
+                        setTimeout(() => {
+                            loadPerformanceChart();
+                            loadTrendChart();
+                            loadDepartmentChart();
+                        }, 500);
+                    });
+                }
+            });
+
+            // Handle date changes
+            const startDate = document.getElementById('StartDate');
+            const endDate = document.getElementById('EndDate');
+
+            if (startDate && endDate) {
+                let dateTimeout;
+
+                function handleDateChange() {
+                    clearTimeout(dateTimeout);
+                    dateTimeout = setTimeout(() => {
+                        currentFilters.startDate = startDate.value;
+                        currentFilters.endDate = endDate.value;
+
+                        if (startDate.value && endDate.value) {
+                            loadPerformanceChart();
+                            loadTrendChart();
+                            loadDepartmentChart();
+                        }
+                    }, 1000);
+                }
+
+                startDate.addEventListener('change', handleDateChange);
+                endDate.addEventListener('change', handleDateChange);
+            }
+        });
+    </script>
+}

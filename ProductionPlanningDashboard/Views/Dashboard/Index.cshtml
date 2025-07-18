@@ -1,0 +1,400 @@
+﻿<!-- ===== FIXED VIEWS/Dashboard/Index.cshtml - Proper Razor Syntax ===== -->
+@model ProductionPlanningDashboard.Models.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Production Planning Dashboard";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="bi bi-speedometer2 me-2"></i>Production Planning Dashboard
+            </h1>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary" onclick="refreshDashboard()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                </button>
+                <a href="#" onclick="exportData()" class="btn btn-outline-success">
+                    <i class="bi bi-file-earmark-excel me-1"></i>Export
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Department Quick Access -->
+@* <div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-plus-circle me-2"></i>Quick Data Entry by Department
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="card border-2 border-primary entry-card cursor-pointer" onclick="goToDataEntry('FullShoe')">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-boot fs-1 text-primary mb-3"></i>
+                                <h5 class="card-title">Full Shoe Production</h5>
+                                <p class="card-text text-muted">Enter production line data</p>
+                                <div class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-pencil-square me-1"></i>Enter Data
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-2 border-success entry-card cursor-pointer" onclick="goToDataEntry('Upper')">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-bezier2 fs-1 text-success mb-3"></i>
+                                <h5 class="card-title">Upper Department</h5>
+                                <p class="card-text text-muted">Enter company unit data</p>
+                                <div class="btn btn-outline-success btn-sm">
+                                    <i class="bi bi-pencil-square me-1"></i>Enter Data
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-2 border-warning entry-card cursor-pointer" onclick="goToDataEntry('Bottom')">
+                            <div class="card-body text-center py-4">
+                                <i class="bi bi-circle fs-1 text-warning mb-3"></i>
+                                <h5 class="card-title">Bottom Department</h5>
+                                <p class="card-text text-muted">Enter bottom production data</p>
+                                <div class="btn btn-outline-warning btn-sm">
+                                    <i class="bi bi-pencil-square me-1"></i>Enter Data
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+ *@
+<!-- Filters Card -->
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-funnel me-2"></i>Filters
+        </h5>
+    </div>
+    <div class="card-body">
+        <form id="filterForm" method="get" action="/Dashboard/Index">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="CompanyId" class="form-label">Company</label>
+                    <select name="CompanyId" class="form-select" id="CompanyId">
+                        <option value="">All Companies</option>
+                        @foreach (var company in Model.Companies)
+                        {
+                            if (Model.Filters.CompanyId == company.Id)
+                            {
+                                <option value="@company.Id" selected>@company.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@company.Id">@company.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="DepartmentId" class="form-label">Department</label>
+                    <select name="DepartmentId" class="form-select" id="DepartmentId">
+                        <option value="">All Departments</option>
+                        @foreach (var dept in Model.Departments)
+                        {
+                            if (Model.Filters.DepartmentId == dept.Id)
+                            {
+                                <option value="@dept.Id" selected>@dept.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@dept.Id">@dept.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label for="StartDate" class="form-label">Start Date</label>
+                    <input name="StartDate" type="date" class="form-control" id="StartDate"
+                           value="@(Model.Filters.StartDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+
+                <div class="col-md-2">
+                    <label for="EndDate" class="form-label">End Date</label>
+                    <input name="EndDate" type="date" class="form-control" id="EndDate"
+                           value="@(Model.Filters.EndDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+
+                <div class="col-md-2">
+                    <label for="PeriodType" class="form-label">Period</label>
+                    <select name="PeriodType" class="form-select" id="PeriodType">
+                        @if (Model.Filters.PeriodType == "Weekly")
+                        {
+                            <option value="Weekly" selected>Weekly</option>
+                            <option value="Monthly">Monthly</option>
+                        }
+                        else
+                        {
+                            <option value="Weekly">Weekly</option>
+                            <option value="Monthly" selected>Monthly</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-search me-1"></i>Apply Filters
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                        <i class="bi bi-x-circle me-1"></i>Clear
+                    </button>
+                    <button type="button" class="btn btn-outline-info" onclick="setThisWeek()">
+                        <i class="bi bi-calendar-week me-1"></i>This Week
+                    </button>
+                    <button type="button" class="btn btn-outline-warning" onclick="setThisMonth()">
+                        <i class="bi bi-calendar-month me-1"></i>This Month
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col me-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Planned</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Stats.TotalPlanned.ToString("N0")</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-target fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col me-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Actual</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Stats.TotalActual.ToString("N0")</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-check-circle fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col me-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Performance</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Stats.PerformancePercentage.ToString("F1")%</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-graph-up fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col me-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Total Records</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Stats.TotalRecords</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-list-ol fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Results Info -->
+@if (Model.Filters.CompanyId.HasValue || Model.Filters.DepartmentId.HasValue || Model.Filters.StartDate.HasValue || Model.Filters.EndDate.HasValue)
+{
+    <div class="alert alert-info mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi bi-funnel me-2"></i>
+                <strong>Filters Applied:</strong>
+                @if (Model.Filters.CompanyId.HasValue)
+                {
+                    var company = Model.Companies.FirstOrDefault(c => c.Id == Model.Filters.CompanyId);
+                    if (company != null)
+                    {
+                        <span class="badge bg-primary me-1">Company: @company.Name</span>
+                    }
+                }
+                @if (Model.Filters.DepartmentId.HasValue)
+                {
+                    var department = Model.Departments.FirstOrDefault(d => d.Id == Model.Filters.DepartmentId);
+                    if (department != null)
+                    {
+                        <span class="badge bg-success me-1">Department: @department.Name</span>
+                    }
+                }
+                @if (Model.Filters.StartDate.HasValue)
+                {
+                    <span class="badge bg-info me-1">From: @Model.Filters.StartDate.Value.ToString("MMM dd, yyyy")</span>
+                }
+                @if (Model.Filters.EndDate.HasValue)
+                {
+                    <span class="badge bg-warning me-1">To: @Model.Filters.EndDate.Value.ToString("MMM dd, yyyy")</span>
+                }
+                <span class="badge bg-secondary">@Model.Filters.PeriodType</span>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearFilters()">
+                <i class="bi bi-x"></i> Clear All
+            </button>
+        </div>
+    </div>
+}
+
+<!-- Summary Table -->
+<div class="card">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="bi bi-table me-2"></i>Production Summary
+            <span class="badge bg-light text-dark ms-2">@Model.SummaryData.Count records</span>
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <div id="summaryTableContainer">
+                @Html.Partial("_SummaryTable", Model.SummaryData)
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Navigation functions
+    function goToDataEntry(department) {
+        window.location.href = `/DataEntry/${department}`;
+    }
+
+    function refreshDashboard() {
+        location.reload();
+    }
+
+    // Filter functions
+    function clearFilters() {
+        document.getElementById('CompanyId').value = '';
+        document.getElementById('DepartmentId').value = '';
+        document.getElementById('StartDate').value = '';
+        document.getElementById('EndDate').value = '';
+        document.getElementById('PeriodType').value = 'Weekly';
+
+        document.getElementById('filterForm').submit();
+    }
+
+    function setThisWeek() {
+        const today = new Date();
+        const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+        const lastDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+
+        document.getElementById('StartDate').value = firstDayOfWeek.toISOString().split('T')[0];
+        document.getElementById('EndDate').value = lastDayOfWeek.toISOString().split('T')[0];
+        document.getElementById('PeriodType').value = 'Weekly';
+
+        if (typeof showToast === 'function') {
+            showToast('Filter set to this week', 'info');
+        }
+    }
+
+    function setThisMonth() {
+        const today = new Date();
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+        document.getElementById('StartDate').value = firstDayOfMonth.toISOString().split('T')[0];
+        document.getElementById('EndDate').value = lastDayOfMonth.toISOString().split('T')[0];
+        document.getElementById('PeriodType').value = 'Monthly';
+
+        if (typeof showToast === 'function') {
+            showToast('Filter set to this month', 'info');
+        }
+    }
+
+    function exportData() {
+        // Build export URL with current filters
+        const form = document.getElementById('filterForm');
+        const formData = new FormData(form);
+        const params = new URLSearchParams(formData);
+
+        window.location.href = `/Dashboard/ExportToExcel?${params.toString()}`;
+    }
+
+    // Show loading state when form is submitted
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterForm = document.getElementById('filterForm');
+        if (filterForm) {
+            filterForm.addEventListener('submit', function() {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-1"></i>Loading...';
+                    submitBtn.disabled = true;
+
+                    // Re-enable after a timeout in case of errors
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    }, 5000);
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+        .cursor-pointer:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
+        }
+
+    .entry-card {
+        transition: all 0.3s ease;
+    }
+
+        .entry-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+    }
+</style>

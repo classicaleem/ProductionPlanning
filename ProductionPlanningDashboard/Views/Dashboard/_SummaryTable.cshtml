@@ -1,0 +1,318 @@
+﻿<!-- ===== FIXED VIEWS/Shared/_SummaryTable.cshtml - Properly Aligned & Responsive ===== -->
+@model List<ProductionPlanningDashboard.Models.DTOs.SummaryDataDTO>
+
+@if (Model != null && Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle" id="summaryTable">
+            <thead class="table-dark sticky-top">
+                <tr>
+                    <th scope="col" class="text-center" style="min-width: 120px;">
+                        <i class="bi bi-calendar3 me-1"></i>Date
+                    </th>
+                    <th scope="col" class="text-center" style="min-width: 100px;">
+                        <i class="bi bi-building me-1"></i>Company
+                    </th>
+                    <th scope="col" class="text-center" style="min-width: 120px;">
+                        <i class="bi bi-diagram-3 me-1"></i>Department
+                    </th>
+                    <th scope="col" class="text-end" style="min-width: 100px;">
+                        <i class="bi bi-target me-1"></i>Planned
+                    </th>
+                    <th scope="col" class="text-end" style="min-width: 100px;">
+                        <i class="bi bi-check-circle me-1"></i>Actual
+                    </th>
+                    <th scope="col" class="text-end" style="min-width: 100px;">
+                        <i class="bi bi-plus-slash-minus me-1"></i>Difference
+                    </th>
+                    <th scope="col" class="text-end" style="min-width: 110px;">
+                        <i class="bi bi-percent me-1"></i>Performance
+                    </th>
+                    <th scope="col" class="text-center" style="min-width: 120px;">
+                        <i class="bi bi-award me-1"></i>Status
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="@(item.PerformancePercentage >= 100 ? "table-success" : item.PerformancePercentage >= 80 ? "table-warning" : "table-danger")">
+                        <td class="text-center fw-medium">
+                            @item.PlanDate.ToString("MMM dd, yyyy")
+                            <br>
+                            <small class="text-muted">@item.PlanDate.ToString("dddd")</small>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge rounded-pill bg-primary fs-6 px-3 py-2">
+                                @item.CompanyName
+                            </span>
+                        </td>
+                        <td class="text-center fw-medium">
+                            @item.DepartmentName
+                        </td>
+                        <td class="text-end">
+                            <span class="fw-bold text-primary fs-6">
+                                @item.PlannedQuantity.ToString("N0")
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <span class="fw-bold text-success fs-6">
+                                @item.ActualQuantity.ToString("N0")
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            @if (item.Difference >= 0)
+                            {
+                                <span class="badge bg-success fs-6 px-3 py-2">
+                                    <i class="bi bi-arrow-up me-1"></i>+@item.Difference.ToString("N0")
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger fs-6 px-3 py-2">
+                                    <i class="bi bi-arrow-down me-1"></i>@item.Difference.ToString("N0")
+                                </span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex flex-column align-items-end">
+                                <span class="fw-bold fs-6 @(item.PerformancePercentage >= 100 ? "text-success" : item.PerformancePercentage >= 80 ? "text-warning" : "text-danger")">
+                                    @item.PerformancePercentage.ToString("F1")%
+                                </span>
+                                <div class="progress mt-1" style="width: 80px; height: 4px;">
+                                    <div class="progress-bar @(item.PerformancePercentage >= 100 ? "bg-success" : item.PerformancePercentage >= 80 ? "bg-warning" : "bg-danger")"
+                                         role="progressbar"
+                                         style="width: @(Math.Min(item.PerformancePercentage, 100))%">
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            @if (item.PerformancePercentage >= 100)
+                            {
+                                <span class="badge bg-success fs-6 px-3 py-2">
+                                    <i class="bi bi-check-circle-fill me-1"></i>Excellent
+                                </span>
+                            }
+                            else if (item.PerformancePercentage >= 80)
+                            {
+                                <span class="badge bg-warning fs-6 px-3 py-2">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Good
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger fs-6 px-3 py-2">
+                                    <i class="bi bi-x-circle-fill me-1"></i>Below Target
+                                </span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Table Summary Footer -->
+    <div class="row mt-3 p-3 bg-light rounded">
+        <div class="col-md-3 text-center">
+            <div class="border-end">
+                <h6 class="text-muted mb-1">Total Records</h6>
+                <span class="h5 text-primary">@Model.Count</span>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="border-end">
+                <h6 class="text-muted mb-1">Total Planned</h6>
+                <span class="h5 text-info">@Model.Sum(x => x.PlannedQuantity).ToString("N0")</span>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="border-end">
+                <h6 class="text-muted mb-1">Total Actual</h6>
+                <span class="h5 text-success">@Model.Sum(x => x.ActualQuantity).ToString("N0")</span>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <h6 class="text-muted mb-1">Avg Performance</h6>
+            <span class="h5 @(Model.Average(x => x.PerformancePercentage) >= 100 ? "text-success" : Model.Average(x => x.PerformancePercentage) >= 80 ? "text-warning" : "text-danger")">
+                @Model.Average(x => x.PerformancePercentage).ToString("F1")%
+            </span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-inbox display-1 text-muted"></i>
+        </div>
+        <h4 class="text-muted mb-3">No Production Data Found</h4>
+        <p class="text-muted mb-4">
+            No production data matches your current filters. Try adjusting your date range or filter criteria,
+            or add some production data to get started.
+        </p>
+
+        <!-- Quick Action Buttons -->
+        <div class="row justify-content-center">
+            <div class="col-auto">
+                <a href="/DataEntry/FullShoe" class="btn btn-primary btn-lg me-2 mb-2">
+                    <i class="bi bi-boot me-2"></i>Add Full Shoe Data
+                </a>
+            </div>
+            <div class="col-auto">
+                <a href="/DataEntry/Upper" class="btn btn-success btn-lg me-2 mb-2">
+                    <i class="bi bi-bezier2 me-2"></i>Add Upper Data
+                </a>
+            </div>
+            <div class="col-auto">
+                <a href="/DataEntry/Bottom" class="btn btn-warning btn-lg mb-2">
+                    <i class="bi bi-circle me-2"></i>Add Bottom Data
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter Reset Option -->
+        <div class="mt-4">
+            <button type="button" class="btn btn-outline-secondary" onclick="clearAllFilters()">
+                <i class="bi bi-funnel me-2"></i>Clear All Filters
+            </button>
+        </div>
+    </div>
+}
+
+<!-- Additional CSS for Better Table Styling -->
+<style>
+    #summaryTable {
+        font-size: 0.9rem;
+    }
+
+        #summaryTable th {
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.8rem;
+            border-bottom: 2px solid #dee2e6;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        #summaryTable td {
+            vertical-align: middle;
+            padding: 1rem 0.75rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        #summaryTable tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05) !important;
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    }
+
+    .progress {
+        border-radius: 2px;
+        background-color: #f8f9fa;
+    }
+
+    .badge.fs-6 {
+        font-size: 0.8rem !important;
+        font-weight: 500;
+    }
+
+    .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    /* Mobile Responsive Adjustments */
+    media (max-width: 768px) {
+        #summaryTable
+
+    {
+        font-size: 0.8rem;
+    }
+
+    #summaryTable th,
+    #summaryTable td {
+        padding: 0.5rem 0.25rem;
+    }
+
+    .badge.fs-6 {
+        font-size: 0.7rem !important;
+        padding: 0.25rem 0.5rem !important;
+    }
+
+    .progress {
+        width: 60px !important;
+    }
+
+    }
+
+    /* Tablet Responsive */
+    media (max-width: 992px) {
+        #summaryTable th
+
+    {
+        font-size: 0.75rem;
+    }
+
+    #summaryTable td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    }
+
+    /* Very small screens */
+    media (max-width: 576px) {
+        .table-responsive
+
+    {
+        font-size: 0.75rem;
+    }
+
+    #summaryTable th,
+    #summaryTable td {
+        padding: 0.4rem 0.2rem;
+    }
+
+    .badge {
+        font-size: 0.6rem !important;
+        padding: 0.2rem 0.4rem !important;
+    }
+
+    }
+</style>
+
+<script>
+    function clearAllFilters() {
+        // Clear all filter inputs
+        const companySelect = document.getElementById('CompanyId');
+        const departmentSelect = document.getElementById('DepartmentId');
+        const startDate = document.getElementById('StartDate');
+        const endDate = document.getElementById('EndDate');
+        const periodType = document.getElementById('PeriodType');
+
+        if (companySelect) companySelect.value = '';
+        if (departmentSelect) departmentSelect.value = '';
+        if (startDate) startDate.value = '';
+        if (endDate) endDate.value = '';
+        if (periodType) periodType.value = 'Weekly';
+
+        // Submit the form to refresh
+        const filterForm = document.getElementById('filterForm');
+        if (filterForm) {
+            filterForm.submit();
+        } else {
+            // Fallback: reload page without query parameters
+            window.location.href = window.location.pathname;
+        }
+    }
+</script>
