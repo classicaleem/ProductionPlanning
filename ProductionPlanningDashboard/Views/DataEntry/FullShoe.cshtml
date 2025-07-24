@@ -3,161 +3,507 @@
     ViewData["Title"] = "Full Shoe Production Entry";
 }
 
-<div class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="mb-1">
-                    <i class="bi bi-boot text-primary me-2"></i>Full Shoe Production Entry
-                </h2>
-                <p class="text-muted">Enter production data by selecting lines and quantities</p>
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        --hover-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .hero-section {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0 0 50px 50px;
+        box-shadow: var(--card-shadow);
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    .attractive-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        border: none;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+        .attractive-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+    .card-header-gradient {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 1.5rem;
+        border: none;
+        font-weight: 600;
+    }
+
+    .date-selector {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        margin: 1.5rem 0;
+        box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .date-input-group {
+        background: white;
+        border-radius: 15px;
+        padding: 1rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .week-display {
+        background: var(--success-gradient);
+        color: white;
+        border-radius: 15px;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .week-number-input {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+        .week-number-input:focus {
+            border-color: #4facfe;
+            box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25);
+        }
+
+    .production-table {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .table-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        color: white;
+    }
+
+        .table-header th {
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+    .table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+        .table tbody tr:hover {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            transform: scale(1.02);
+        }
+
+    .modern-input {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+        .modern-input:focus {
+            border-color: #4facfe;
+            box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25);
+        }
+
+    .modern-select {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+        .modern-select:focus {
+            border-color: #4facfe;
+            box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25);
+        }
+
+    .action-buttons {
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .btn-modern {
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        border: none;
+        margin: 0.5rem;
+    }
+
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+    .btn-save {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-add {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+
+    .btn-clear {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: white;
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: #333;
+    }
+
+    .difference-badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+
+    .stats-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .floating-add-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--success-gradient);
+        color: white;
+        border: none;
+        font-size: 1.5rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+
+        .floating-add-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+
+    keyframes pulse {
+        0%
+
+    {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+</style>
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="hero-title">
+                    <i class="bi bi-boot me-3"></i>Full Shoe Production Entry
+                </h1>
+                <p class="hero-subtitle">Enter production data with style and efficiency</p>
             </div>
-            <div class="btn-group">
-                <a href="/Dashboard" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+            <div class="col-md-4 text-end">
+                <a href="/Dashboard" class="btn btn-back btn-modern">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
                 </a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Date Selection Card -->
-<div class="card entry-card mb-4">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">
-            <i class="bi bi-calendar me-2"></i>Production Date
-        </h5>
-    </div>
-    <div class="card-body">
-        <div class="row align-items-center">
-            <div class="col-md-4">
-                <label class="form-label">Select Date</label>
-                <div class="input-group">
-                    <input type="date" id="productionDate" class="form-control"
-                           value="@Model.SelectedDate.ToString("yyyy-MM-dd")" onchange="updateDateInfo()">
-                    <button class="btn btn-outline-secondary" onclick="setToday()">Today</button>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Week Number</label>
-                <input type="number" id="weekNumber" class="form-control" readonly
-                       value="@Model.WeekNumber" min="1" max="53">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Month</label>
-                <input type="number" id="monthNumber" class="form-control" readonly
-                       value="@Model.MonthNumber" min="1" max="12">
-            </div>
-        </div>
-
-        <div class="date-info mt-3">
-            <div class="row text-center">
-                <div class="col-md-4">
-                    <strong>Selected Date:</strong><br>
-                    <span id="displayDate">@Model.SelectedDate.ToString("dddd, MMMM dd, yyyy")</span>
-                </div>
-                <div class="col-md-4">
-                    <strong>Week:</strong><br>
-                    <span id="displayWeek">Week @Model.WeekNumber of @Model.Year</span>
-                </div>
-                <div class="col-md-4">
-                    <strong>Period:</strong><br>
-                    <select id="periodType" class="form-select d-inline-block w-auto">
-                        <option value="Weekly">Weekly</option>
-                        <option value="Monthly">Monthly</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Production Entry Card -->
-<div class="card entry-card">
-    <div class="card-header bg-success text-white">
-        <div class="d-flex justify-content-between align-items-center">
+<div class="container">
+    <!-- Date Selection Card -->
+    <div class="attractive-card fade-in">
+        <div class="card-header-gradient">
             <h5 class="mb-0">
-                <i class="bi bi-list-task me-2"></i>Production Lines Entry
+                <i class="bi bi-calendar-event me-2"></i>Production Date & Week Selection
             </h5>
-            <button class="btn btn-light btn-sm" onclick="showAddLineModal()">
-                <i class="bi bi-plus-circle me-1"></i>Add Production Line
-            </button>
+        </div>
+        <div class="card-body">
+            <div class="date-selector">
+                <div class="row align-items-center">
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold mb-3">Select Production Date</label>
+                        <div class="date-input-group">
+                            <input type="date" id="productionDate" class="form-control modern-input"
+                                   value="@Model.SelectedDate.ToString("yyyy-MM-dd")" onchange="updateWeekInfo()">
+                            <button class="btn btn-add btn-modern mt-2" onclick="setToday()">
+                                <i class="bi bi-calendar-today me-2"></i>Set Today
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <div class="week-display">
+                            <i class="bi bi-arrow-left-right fs-2 mb-2"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold mb-3">Week Number (Editable)</label>
+                        <div class="week-display">
+                            <input type="number" id="weekNumber" class="week-number-input"
+                                   value="@Model.WeekNumber" min="1" max="53" onchange="updateFromWeek()">
+                            <div class="mt-2">
+                                <small>Week of <span id="weekYear">@Model.Year</span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12 text-center">
+                        <div class="stats-card">
+                            <div class="stats-label">Selected Date</div>
+                            <div class="stats-number text-primary" id="displayDate">@Model.SelectedDate.ToString("MMMM dd, yyyy")</div>
+                            <div class="stats-label" id="displayDay">@Model.SelectedDate.ToString("dddd")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="card-body">
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle me-2"></i>
-            <strong>Full Shoe Production:</strong> Select a company to see available production lines. Each company has different numbers of lines.
-        </div>
 
-        <div class="table-responsive">
-            <table class="table table-striped entry-table" id="fullShoeTable">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Company</th>
-                        <th>Production Line</th>
-                        <th>Planned Quantity</th>
-                        <th>Actual Quantity</th>
-                        <th>Difference</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="fullShoeTableBody">
-                    <!-- Data will be populated by JavaScript -->
-                </tbody>
-            </table>
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-label">Total Entries</div>
+                <div class="stats-number text-info" id="totalEntries">0</div>
+            </div>
         </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-label">Planned Total</div>
+                <div class="stats-number text-primary" id="plannedTotal">0</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-label">Actual Total</div>
+                <div class="stats-number text-success" id="actualTotal">0</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-label">Efficiency</div>
+                <div class="stats-number text-warning" id="efficiency">0%</div>
+            </div>
+        </div>
+    </div>
 
-        <div class="mt-4 text-center">
-            <button class="btn btn-save btn-lg me-3" onclick="saveFullShoeData()">
-                <i class="bi bi-floppy me-2"></i>Save Production Data
-            </button>
-            <button class="btn btn-outline-secondary btn-lg" onclick="clearAllData()">
-                <i class="bi bi-trash me-2"></i>Clear All
-            </button>
+    <!-- Production Entry Table -->
+    <div class="attractive-card fade-in">
+        <div class="card-header-gradient">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-task me-2"></i>Production Lines Entry
+                </h5>
+                <button class="btn btn-add btn-modern" onclick="showAddLineModal()">
+                    <i class="bi bi-plus-circle me-2"></i>Add Production Line
+                </button>
+            </div>
         </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 production-table">
+                    <thead class="table-header">
+                        <tr>
+                            <th><i class="bi bi-building me-2"></i>Company</th>
+                            <th><i class="bi bi-gear me-2"></i>Production Line</th>
+                            <th><i class="bi bi-target me-2"></i>Planned Qty</th>
+                            <th><i class="bi bi-check-circle me-2"></i>Actual Qty</th>
+                            <th><i class="bi bi-graph-up me-2"></i>Difference</th>
+                            <th><i class="bi bi-tools me-2"></i>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productionTableBody">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="emptyState" class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <h4>No Production Lines Added Yet</h4>
+                <p>Click "Add Production Line" to start entering your production data</p>
+                <button class="btn btn-add btn-modern pulse" onclick="showAddLineModal()">
+                    <i class="bi bi-plus-circle me-2"></i>Add Your First Line
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button class="btn btn-save btn-modern" onclick="saveFullShoeData()">
+            <i class="bi bi-floppy me-2"></i>Save All Data
+        </button>
+        <button class="btn btn-clear btn-modern" onclick="clearAllData()">
+            <i class="bi bi-trash me-2"></i>Clear All
+        </button>
     </div>
 </div>
+
+<!-- Floating Add Button -->
+<button class="floating-add-btn" onclick="showAddLineModal()">
+    <i class="bi bi-plus"></i>
+</button>
 
 <!-- Add Line Modal -->
 <div class="modal fade" id="addLineModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add Production Line</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header" style="background: var(--primary-gradient); color: white;">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle me-2"></i>Add Production Line
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Select Company</label>
-                    <select id="modalCompanySelect" class="form-select" onchange="loadCompanyLines()">
-                        <option value="">Choose Company...</option>
-                        @foreach (var company in Model.Companies)
-                        {
-                            <option value="@company.Id">@company.Name</option>
-                        }
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Select Production Line</label>
-                    <select id="modalLineSelect" class="form-select">
-                        <option value="">Choose Line...</option>
-                    </select>
+            <div class="modal-body p-4">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Select Company</label>
+                        <select id="modalCompanySelect" class="form-select modern-select" onchange="loadCompanyLines()">
+                            <option value="">Choose Company...</option>
+                            @foreach (var company in Model.Companies)
+                            {
+                                <option value="@company.Id">@company.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Select Production Line</label>
+                        <select id="modalLineSelect" class="form-select modern-select">
+                            <option value="">Choose Line...</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-6">
-                        <label class="form-label">Planned Quantity</label>
-                        <input type="number" id="modalPlannedQty" class="form-control" min="0" step="0.01" placeholder="0">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Planned Quantity</label>
+                        <input type="number" id="modalPlannedQty" class="form-control modern-input"
+                               min="0" step="0.01" placeholder="Enter planned quantity">
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Actual Quantity</label>
-                        <input type="number" id="modalActualQty" class="form-control" min="0" step="0.01" placeholder="0">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Actual Quantity</label>
+                        <input type="number" id="modalActualQty" class="form-control modern-input"
+                               min="0" step="0.01" placeholder="Enter actual quantity">
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addLineEntry()">Add Entry</button>
+                <button type="button" class="btn btn-clear btn-modern" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-add btn-modern" onclick="addLineEntry()">
+                    <i class="bi bi-check-circle me-2"></i>Add Entry
+                </button>
             </div>
         </div>
     </div>
@@ -170,22 +516,59 @@
 
         // Initialize page
         $(document).ready(function() {
-            updateDateInfo();
+            updateWeekInfo();
             loadExistingData();
+            updateStats();
         });
 
-        // Date functions
-        function updateDateInfo() {
+        // Date and Week functions
+        function updateWeekInfo() {
             const date = new Date(document.getElementById('productionDate').value);
-            document.getElementById('weekNumber').value = getWeekNumber(date);
-            document.getElementById('monthNumber').value = date.getMonth() + 1;
+            const weekNumber = getWeekNumber(date);
+
+            document.getElementById('weekNumber').value = weekNumber;
+            document.getElementById('weekYear').textContent = date.getFullYear();
             document.getElementById('displayDate').textContent = formatDate(date);
-            document.getElementById('displayWeek').textContent = `Week ${getWeekNumber(date)} of ${date.getFullYear()}`;
+            document.getElementById('displayDay').textContent = date.toLocaleDateString('en-US', { weekday: 'long' });
+        }
+
+        function updateFromWeek() {
+            const weekNumber = parseInt(document.getElementById('weekNumber').value);
+            const year = parseInt(document.getElementById('weekYear').textContent);
+
+            if (weekNumber >= 1 && weekNumber <= 53) {
+                const date = getDateFromWeek(year, weekNumber);
+                document.getElementById('productionDate').value = date.toISOString().split('T')[0];
+                updateWeekInfo();
+                loadDataForDate();
+            }
+        }
+
+        function getWeekNumber(date) {
+            const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+            const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+            return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+        }
+
+        function getDateFromWeek(year, week) {
+            const firstDayOfYear = new Date(year, 0, 1);
+            const days = (week - 1) * 7 - firstDayOfYear.getDay() + 1;
+            return new Date(year, 0, days);
+        }
+
+        function formatDate(date) {
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
         }
 
         function setToday() {
-            document.getElementById('productionDate').value = new Date().toISOString().split('T')[0];
-            updateDateInfo();
+            const today = new Date();
+            document.getElementById('productionDate').value = today.toISOString().split('T')[0];
+            updateWeekInfo();
+            loadDataForDate();
         }
 
         // Modal functions
@@ -229,7 +612,7 @@
             const actualQty = parseFloat(document.getElementById('modalActualQty').value) || 0;
 
             if (!companyId || !lineId) {
-                alert('Please select both company and line');
+                showToast('Please select both company and line', 'warning');
                 return;
             }
 
@@ -249,79 +632,121 @@
 
             lineEntries.push(entry);
             renderTable();
+            updateStats();
             bootstrap.Modal.getInstance(document.getElementById('addLineModal')).hide();
+            showToast('Production line added successfully!', 'success');
         }
 
         function renderTable() {
-            const tbody = document.getElementById('fullShoeTableBody');
+            const tbody = document.getElementById('productionTableBody');
+            const emptyState = document.getElementById('emptyState');
+
             tbody.innerHTML = '';
 
-            lineEntries.forEach((entry, index) => {
-                if (entry.isDeleted) return;
+            const activeEntries = lineEntries.filter(e => !e.isDeleted);
 
-                const difference = entry.actualQuantity - entry.plannedQuantity;
-                const row = `
-                    <tr>
-                        <td>${entry.companyName}</td>
-                        <td>${entry.lineName}</td>
-                        <td>
-                            <input type="number" class="form-control" value="${entry.plannedQuantity}"
-                                   min="0" step="0.01" onchange="updateEntry(${index}, 'plannedQuantity', this.value)">
-                        </td>
-                        <td>
-                            <input type="number" class="form-control" value="${entry.actualQuantity}"
-                                   min="0" step="0.01" onchange="updateEntry(${index}, 'actualQuantity', this.value)">
-                        </td>
-                        <td>
-                            <span class="badge ${difference >= 0 ? 'bg-success' : 'bg-danger'} fs-6">
-                                ${difference.toFixed(2)}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteEntry(${index})">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
-            });
-
-            if (lineEntries.filter(e => !e.isDeleted).length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No entries yet. Click "Add Production Line" to get started.</td></tr>';
+            if (activeEntries.length === 0) {
+                emptyState.style.display = 'block';
+                return;
             }
+
+            emptyState.style.display = 'none';
+
+            activeEntries.forEach((entry, index) => {
+                const difference = entry.actualQuantity - entry.plannedQuantity;
+                const row = document.createElement('tr');
+                row.className = 'fade-in';
+                row.innerHTML = `
+                    <td class="fw-bold">${entry.companyName}</td>
+                    <td>${entry.lineName}</td>
+                    <td>
+                        <input type="number" class="form-control modern-input" value="${entry.plannedQuantity}"
+                               min="0" step="0.01" onchange="updateEntry(${index}, 'plannedQuantity', this.value)">
+                    </td>
+                    <td>
+                        <input type="number" class="form-control modern-input" value="${entry.actualQuantity}"
+                               min="0" step="0.01" onchange="updateEntry(${index}, 'actualQuantity', this.value)">
+                    </td>
+                    <td>
+                        <span class="difference-badge ${difference >= 0 ? 'bg-success' : 'bg-danger'}">
+                            ${difference >= 0 ? '+' : ''}${difference.toFixed(2)}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteEntry(${index})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
         }
 
         function updateEntry(index, field, value) {
             lineEntries[index][field] = parseFloat(value) || 0;
             renderTable();
+            updateStats();
         }
 
         function deleteEntry(index) {
             if (confirm('Are you sure you want to delete this entry?')) {
                 lineEntries[index].isDeleted = true;
                 renderTable();
+                updateStats();
+                showToast('Entry deleted successfully!', 'warning');
             }
+        }
+
+        function updateStats() {
+            const activeEntries = lineEntries.filter(e => !e.isDeleted);
+            const totalPlanned = activeEntries.reduce((sum, e) => sum + e.plannedQuantity, 0);
+            const totalActual = activeEntries.reduce((sum, e) => sum + e.actualQuantity, 0);
+            const efficiency = totalPlanned > 0 ? ((totalActual / totalPlanned) * 100) : 0;
+
+            document.getElementById('totalEntries').textContent = activeEntries.length;
+            document.getElementById('plannedTotal').textContent = totalPlanned.toFixed(2);
+            document.getElementById('actualTotal').textContent = totalActual.toFixed(2);
+            document.getElementById('efficiency').textContent = efficiency.toFixed(1) + '%';
         }
 
         function clearAllData() {
             if (confirm('Are you sure you want to clear all data?')) {
                 lineEntries = [];
                 renderTable();
+                updateStats();
+                showToast('All data cleared!', 'info');
             }
+        }
+
+        function loadDataForDate() {
+            // Load existing data for the selected date
+            renderTable();
+            updateStats();
+        }
+
+        function loadExistingData() {
+            // Load existing entries from the model
+            @if (Model.LineEntries != null && Model.LineEntries.Any())
+            {
+                        <text>
+                        lineEntries = @Html.Raw(Json.Serialize(Model.LineEntries));
+                        </text>
+            }
+            renderTable();
+            updateStats();
         }
 
         function saveFullShoeData() {
             const validEntries = lineEntries.filter(e => !e.isDeleted);
 
             if (validEntries.length === 0) {
-                alert('No data to save. Please add some production entries first.');
+                showToast('No data to save. Please add some production entries first.', 'warning');
                 return;
             }
 
             const data = {
                 date: document.getElementById('productionDate').value,
-                periodType: document.getElementById('periodType').value,
+                weekNumber: parseInt(document.getElementById('weekNumber').value),
                 lineEntries: validEntries
             };
 
@@ -355,12 +780,6 @@
                 saveButton.innerHTML = originalText;
                 saveButton.disabled = false;
             });
-        }
-
-        function loadExistingData() {
-            // Load existing data for the selected date
-            // This would be implemented to load existing entries
-            renderTable();
         }
     </script>
 }
