@@ -27,8 +27,6 @@ namespace ProductionPlanningDashboard.Controllers
             return View(viewModel);
         }
 
-
-
         // API Endpoints
         [HttpGet]
         public async Task<IActionResult> GetLinesByCompany(int companyId, int departmentId)
@@ -58,19 +56,6 @@ namespace ProductionPlanningDashboard.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> SaveBottomEntry([FromBody] SaveLineEntryRequest request)
-        {
-            try
-            {
-                var savedCount = await _service.SaveLineEntriesAsync(3, request.Date, request.LineEntries);
-                return Json(new { success = true, savedCount, message = $"{savedCount} entries saved successfully!" });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
 
         [HttpPost]
         public async Task<IActionResult> SaveUpperEntry([FromBody] SaveUpperRequest request)
@@ -90,7 +75,6 @@ namespace ProductionPlanningDashboard.Controllers
     public class SaveLineEntryRequest
     {
         public DateTime Date { get; set; }
-        public string PeriodType { get; set; } = "Weekly";
         public List<LineEntry> LineEntries { get; set; } = new();
     }
 
