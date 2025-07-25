@@ -14,25 +14,20 @@ namespace ProductionPlanningDashboard.Controllers
         }
 
         // Full Shoe Entry
-        public async Task<IActionResult> FullShoe(DateTime? date = null, string periodType = "Weekly")
+        public async Task<IActionResult> FullShoe(DateTime? date = null)
         {
-            var viewModel = await _service.GetDataEntryViewModelAsync(1, date, periodType); // DepartmentId = 1 for Full Shoe
+            var viewModel = await _service.GetDataEntryViewModelAsync(1, date); // DepartmentId = 1 for Full Shoe
             return View(viewModel);
         }
 
         // Upper Entry
-        public async Task<IActionResult> Upper(DateTime? date = null, string periodType = "Weekly")
+        public async Task<IActionResult> Upper(DateTime? date = null)
         {
-            var viewModel = await _service.GetDataEntryViewModelAsync(2, date, periodType); // DepartmentId = 2 for Upper
+            var viewModel = await _service.GetDataEntryViewModelAsync(2, date); // DepartmentId = 2 for Upper
             return View(viewModel);
         }
 
-        // Bottom Entry
-        public async Task<IActionResult> Bottom(DateTime? date = null, string periodType = "Weekly")
-        {
-            var viewModel = await _service.GetDataEntryViewModelAsync(3, date, periodType); // DepartmentId = 3 for Bottom
-            return View(viewModel);
-        }
+
 
         // API Endpoints
         [HttpGet]
@@ -54,7 +49,7 @@ namespace ProductionPlanningDashboard.Controllers
         {
             try
             {
-                var savedCount = await _service.SaveLineEntriesAsync(1, request.Date, request.PeriodType, request.LineEntries);
+                var savedCount = await _service.SaveLineEntriesAsync(1, request.Date, request.LineEntries);
                 return Json(new { success = true, savedCount, message = $"{savedCount} entries saved successfully!" });
             }
             catch (Exception ex)
@@ -68,7 +63,7 @@ namespace ProductionPlanningDashboard.Controllers
         {
             try
             {
-                var savedCount = await _service.SaveLineEntriesAsync(3, request.Date, request.PeriodType, request.LineEntries);
+                var savedCount = await _service.SaveLineEntriesAsync(3, request.Date, request.LineEntries);
                 return Json(new { success = true, savedCount, message = $"{savedCount} entries saved successfully!" });
             }
             catch (Exception ex)
@@ -82,7 +77,7 @@ namespace ProductionPlanningDashboard.Controllers
         {
             try
             {
-                var savedCount = await _service.SaveCompanyUnitEntriesAsync(2, request.Date, request.PeriodType, request.CompanyUnitEntries);
+                var savedCount = await _service.SaveCompanyUnitEntriesAsync(2, request.Date, request.CompanyUnitEntries);
                 return Json(new { success = true, savedCount, message = $"{savedCount} entries saved successfully!" });
             }
             catch (Exception ex)

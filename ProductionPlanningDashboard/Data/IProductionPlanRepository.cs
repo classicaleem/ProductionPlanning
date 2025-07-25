@@ -18,10 +18,10 @@ namespace ProductionPlanningDashboard.Data
         Task<DashboardStats> GetDashboardStatsAsync(FilterViewModel filter);
 
         // Data entry methods
-        Task<List<LineEntry>> GetLineEntriesAsync(int departmentId, DateTime date, string periodType);
-        Task<List<CompanyUnitEntry>> GetCompanyUnitEntriesAsync(int departmentId, DateTime date, string periodType);
-        Task<int> SaveLineEntriesAsync(int departmentId, DateTime date, string periodType, List<LineEntry> entries);
-        Task<int> SaveCompanyUnitEntriesAsync(int departmentId, DateTime date, string periodType, List<CompanyUnitEntry> entries);
+        Task<List<LineEntry>> GetLineEntriesAsync(int departmentId, DateTime date);
+        Task<List<CompanyUnitEntry>> GetCompanyUnitEntriesAsync(int departmentId, DateTime date);
+        Task<int> SaveLineEntriesAsync(int departmentId, DateTime date, List<LineEntry> entries);
+        Task<int> SaveCompanyUnitEntriesAsync(int departmentId, DateTime date, List<CompanyUnitEntry> entries);
         Task<bool> DeleteEntryAsync(int id);
         Task<List<ProductionPlan>> GetProductionPlansAsync(int? departmentId, DateTime? startDate, DateTime? endDate);
     }

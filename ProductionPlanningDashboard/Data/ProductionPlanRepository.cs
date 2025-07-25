@@ -98,18 +98,15 @@ namespace ProductionPlanningDashboard.Data
                     pp.PlanDate,
                     pp.PlannedQuantity,
                     pp.ActualQuantity,
-                    (pp.ActualQuantity - pp.PlannedQuantity) as Difference,
-                    pp.PeriodType
+                    (pp.ActualQuantity - pp.PlannedQuantity) as Difference                    
                 FROM ProductionPlans pp
                 INNER JOIN Companies c ON pp.CompanyId = c.Id
                 INNER JOIN Departments d ON pp.DepartmentId = d.Id
                 WHERE (@CompanyId IS NULL OR pp.CompanyId = @CompanyId)
                   AND (@DepartmentId IS NULL OR pp.DepartmentId = @DepartmentId)
                   AND (@StartDate IS NULL OR pp.PlanDate >= @StartDate)
-                  AND (@EndDate IS NULL OR pp.PlanDate <= @EndDate)
-                  AND pp.PeriodType = @PeriodType
+                  AND (@EndDate IS NULL OR pp.PlanDate <= @EndDate)                  
                 ORDER BY pp.PlanDate DESC, c.Name, d.DisplayOrder";
-
             var result = await connection.QueryAsync<SummaryDataDTO>(sql, filter);
             return result.ToList();
         }
@@ -128,7 +125,7 @@ namespace ProductionPlanningDashboard.Data
                   AND (@DepartmentId IS NULL OR pp.DepartmentId = @DepartmentId)
                   AND (@StartDate IS NULL OR pp.PlanDate >= @StartDate)
                   AND (@EndDate IS NULL OR pp.PlanDate <= @EndDate)
-                  AND pp.PeriodType = @PeriodType";
+                  ";
 
             var result = await connection.QuerySingleAsync<DashboardStats>(sql, filter);
             return result;
@@ -136,7 +133,7 @@ namespace ProductionPlanningDashboard.Data
 
         // ===== DATA ENTRY METHODS =====
 
-        public async Task<List<LineEntry>> GetLineEntriesAsync(int departmentId, DateTime date, string periodType)
+        public async Task<List<LineEntry>> GetLineEntriesAsync(int departmentId, DateTime date)
         {
             using var connection = CreateConnection();
 
@@ -153,11 +150,11 @@ namespace ProductionPlanningDashboard.Data
                 INNER JOIN Companies c ON l.CompanyId = c.Id
                 WHERE pp.DepartmentId = @departmentId 
                   AND pp.PlanDate = @date
-                  AND pp.PeriodType = @periodType
+                  
                   AND pp.LineId IS NOT NULL
                 ORDER BY c.Name, l.DisplayOrder";
 
-            var result = await connection.QueryAsync<LineEntry>(sql, new { departmentId, date, periodType });
+            var result = await connection.QueryAsync<LineEntry>(sql, new { departmentId, date });
             var entries = result.ToList();
 
             // Mark existing entries as not new
@@ -169,7 +166,7 @@ namespace ProductionPlanningDashboard.Data
             return entries;
         }
 
-        public async Task<List<CompanyUnitEntry>> GetCompanyUnitEntriesAsync(int departmentId, DateTime date, string periodType)
+        public async Task<List<CompanyUnitEntry>> GetCompanyUnitEntriesAsync(int departmentId, DateTime date)
         {
             using var connection = CreateConnection();
 
@@ -187,11 +184,11 @@ namespace ProductionPlanningDashboard.Data
                 LEFT JOIN Units u ON pp.UnitId = u.Id
                 WHERE pp.DepartmentId = @departmentId 
                   AND pp.PlanDate = @date
-                  AND pp.PeriodType = @periodType
+                
                   AND pp.UnitId IS NOT NULL
                 ORDER BY c.Name, u.Name";
 
-            var result = await connection.QueryAsync<CompanyUnitEntry>(sql, new { departmentId, date, periodType });
+            var result = await connection.QueryAsync<CompanyUnitEntry>(sql, new { departmentId, date });
             var entries = result.ToList();
 
             // Mark existing entries as not new
@@ -203,7 +200,7 @@ namespace ProductionPlanningDashboard.Data
             return entries;
         }
 
-        public async Task<int> SaveLineEntriesAsync(int departmentId, DateTime date, string periodType, List<LineEntry> entries)
+        public async Task<int> SaveLineEntriesAsync(int departmentId, DateTime date, List<LineEntry> entries)
         {
             using var connection = CreateConnection();
             int savedCount = 0;
@@ -219,14 +216,14 @@ namespace ProductionPlanningDashboard.Data
 
                     var sql = @"
                         MERGE ProductionPlans AS target
-                        USING (SELECT @CompanyId as CompanyId, @DepartmentId as DepartmentId, @LineId as LineId, @PlanDate as PlanDate, @PeriodType as PeriodType) AS source
+                        USING (SELECT @CompanyId as CompanyId, @DepartmentId as DepartmentId, @LineId as LineId, @PlanDate as PlanDate) AS source
                         ON (target.CompanyId = source.CompanyId AND target.DepartmentId = source.DepartmentId 
-                            AND target.LineId = source.LineId AND target.PlanDate = source.PlanDate AND target.PeriodType = source.PeriodType)
+                            AND target.LineId = source.LineId AND target.PlanDate = source.PlanDate)
                         WHEN MATCHED THEN 
                             UPDATE SET PlannedQuantity = @PlannedQuantity, ActualQuantity = @ActualQuantity, UpdatedDate = GETDATE()
                         WHEN NOT MATCHED THEN
-                            INSERT (CompanyId, DepartmentId, LineId, PlanDate, PlannedQuantity, ActualQuantity, PeriodType, CreatedBy)
-                            VALUES (@CompanyId, @DepartmentId, @LineId, @PlanDate, @PlannedQuantity, @ActualQuantity, @PeriodType, @CreatedBy);";
+                            INSERT (CompanyId, DepartmentId, LineId, PlanDate, PlannedQuantity, ActualQuantity,CreatedBy)
+                            VALUES (@CompanyId, @DepartmentId, @LineId, @PlanDate, @PlannedQuantity, @ActualQuantity,@CreatedBy);";
 
                     await connection.ExecuteAsync(sql, new
                     {
@@ -236,7 +233,7 @@ namespace ProductionPlanningDashboard.Data
                         PlanDate = date,
                         entry.PlannedQuantity,
                         entry.ActualQuantity,
-                        PeriodType = periodType,
+                        // PeriodType = periodType,
                         CreatedBy = "System"
                     });
 
@@ -271,7 +268,7 @@ namespace ProductionPlanningDashboard.Data
             return savedCount;
         }
 
-        public async Task<int> SaveCompanyUnitEntriesAsync(int departmentId, DateTime date, string periodType, List<CompanyUnitEntry> entries)
+        public async Task<int> SaveCompanyUnitEntriesAsync(int departmentId, DateTime date, List<CompanyUnitEntry> entries)
         {
             using var connection = CreateConnection();
             int savedCount = 0;
@@ -282,14 +279,14 @@ namespace ProductionPlanningDashboard.Data
                 {
                     var sql = @"
                         MERGE ProductionPlans AS target
-                        USING (SELECT @CompanyId as CompanyId, @DepartmentId as DepartmentId, @UnitId as UnitId, @PlanDate as PlanDate, @PeriodType as PeriodType) AS source
+                        USING (SELECT @CompanyId as CompanyId, @DepartmentId as DepartmentId, @UnitId as UnitId, @PlanDate as PlanDate) AS source
                         ON (target.CompanyId = source.CompanyId AND target.DepartmentId = source.DepartmentId 
-                            AND target.UnitId = source.UnitId AND target.PlanDate = source.PlanDate AND target.PeriodType = source.PeriodType)
+                            AND target.UnitId = source.UnitId AND target.PlanDate = source.PlanDate)
                         WHEN MATCHED THEN 
                             UPDATE SET PlannedQuantity = @PlannedQuantity, ActualQuantity = @ActualQuantity, UpdatedDate = GETDATE()
                         WHEN NOT MATCHED THEN
-                            INSERT (CompanyId, DepartmentId, UnitId, PlanDate, PlannedQuantity, ActualQuantity, PeriodType, CreatedBy)
-                            VALUES (@CompanyId, @DepartmentId, @UnitId, @PlanDate, @PlannedQuantity, @ActualQuantity, @PeriodType, @CreatedBy);";
+                            INSERT (CompanyId, DepartmentId, UnitId, PlanDate, PlannedQuantity, ActualQuantity,CreatedBy)
+                            VALUES (@CompanyId, @DepartmentId, @UnitId, @PlanDate, @PlannedQuantity, @ActualQuantity,@CreatedBy);";
 
                     await connection.ExecuteAsync(sql, new
                     {
@@ -299,7 +296,7 @@ namespace ProductionPlanningDashboard.Data
                         PlanDate = date,
                         entry.PlannedQuantity,
                         entry.ActualQuantity,
-                        PeriodType = periodType,
+
                         CreatedBy = "System"
                     });
 

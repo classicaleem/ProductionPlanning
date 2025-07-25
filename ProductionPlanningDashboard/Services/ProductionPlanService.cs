@@ -27,7 +27,7 @@ namespace ProductionPlanningDashboard.Services
             return viewModel;
         }
 
-        public async Task<DataEntryViewModel> GetDataEntryViewModelAsync(int departmentId, DateTime? date = null, string periodType = "Weekly")
+        public async Task<DataEntryViewModel> GetDataEntryViewModelAsync(int departmentId, DateTime? date = null)
         {
             var selectedDate = date ?? DateTime.Today;
             var departments = await _repository.GetDepartmentsAsync();
@@ -42,17 +42,17 @@ namespace ProductionPlanningDashboard.Services
                 WeekNumber = GetWeekNumber(selectedDate),
                 MonthNumber = selectedDate.Month,
                 Year = selectedDate.Year,
-                PeriodType = periodType,
+                //PeriodType = periodType,
                 Companies = companies,
                 Departments = departments,
                 AllDepartments = departments
             };
 
             // Load department-specific data
-            if (department?.Name == "Full Shoe" || department?.Name == "Bottom")
+            if (department?.Name == "Full Shoe")
             {
                 // Load line entries
-                viewModel.LineEntries = await _repository.GetLineEntriesAsync(departmentId, selectedDate, periodType);
+                viewModel.LineEntries = await _repository.GetLineEntriesAsync(departmentId, selectedDate);
 
                 // Convert to DataRows for backward compatibility
                 viewModel.DataRows = viewModel.LineEntries.Select(le => new DataEntryRow
@@ -70,7 +70,7 @@ namespace ProductionPlanningDashboard.Services
             else if (department?.Name == "Upper")
             {
                 // Load company unit entries
-                viewModel.CompanyUnitEntries = await _repository.GetCompanyUnitEntriesAsync(departmentId, selectedDate, periodType);
+                viewModel.CompanyUnitEntries = await _repository.GetCompanyUnitEntriesAsync(departmentId, selectedDate);
                 viewModel.Units = await _repository.GetAllUnitsAsync();
 
                 // Convert to DataRows for backward compatibility
@@ -102,14 +102,14 @@ namespace ProductionPlanningDashboard.Services
             return viewModel;
         }
 
-        public async Task<int> SaveLineEntriesAsync(int departmentId, DateTime date, string periodType, List<LineEntry> entries)
+        public async Task<int> SaveLineEntriesAsync(int departmentId, DateTime date, List<LineEntry> entries)
         {
-            return await _repository.SaveLineEntriesAsync(departmentId, date, periodType, entries);
+            return await _repository.SaveLineEntriesAsync(departmentId, date, entries);
         }
 
-        public async Task<int> SaveCompanyUnitEntriesAsync(int departmentId, DateTime date, string periodType, List<CompanyUnitEntry> entries)
+        public async Task<int> SaveCompanyUnitEntriesAsync(int departmentId, DateTime date, List<CompanyUnitEntry> entries)
         {
-            return await _repository.SaveCompanyUnitEntriesAsync(departmentId, date, periodType, entries);
+            return await _repository.SaveCompanyUnitEntriesAsync(departmentId, date, entries);
         }
 
         public async Task<List<Line>> GetLinesByCompanyAsync(int companyId, int departmentId)
